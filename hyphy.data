@@ -22013,7 +22013,7 @@ io.ReportProgressMessage ("", ">Minimum size of a partition is set to be `gard.m
 
 /* 1d. Check that there are enough sites to permit cAIC
 ------------------------------------------------------------------------------*/
-io.CheckAssertion("gard.minExpectedSites <= gard.numSites", "The alignment is too short to permit c-AIC based model comparison. Need at least `gard.minExpectedSites` sites for `gard.numSeqs` sequences to fit a two-partiton model.");
+io.CheckAssertion("gard.minExpectedSites <= gard.numSites", "The alignment is too short to permit c-AIC based model comparison. Need at least `gard.minExpectedSites` sites for `gard.numSeqs` sequences to fit a two-partition model.");
 
 
 /* 1e. Baseline fit on entire alignment
@@ -43328,7 +43328,7 @@ bustedph.test_results = {
 
 bustedph.p1 = (bustedph.test_results [terms.json.uncorrected_pvalue ])['FG'];
 bustedph.p2 = (bustedph.test_results [terms.json.uncorrected_pvalue ])['BG'];
-bustedph.p3 = (bustedph.test_results [terms.json.uncorrected_pvalue ])['DIFF'];
+bustedph.p3 = (bustedph.test_results [terms.json.uncorrected_pvalue ])['Comparative'];
 
 
 console.log ("----\n## Branch-site unrestricted statistical test of episodic diversification and association with phenotype/trait [BUSTED-PH]");
@@ -43341,14 +43341,14 @@ console.log ("\n\n## Analysis summary (p = " + bustedph.test_results['Level'] + 
 bustedph.summary = "";
 
 if (Max (bustedph.p1, bustedph.p3) <= busted.p_value ) {
-    bustedph.summary =  ("The composite null hypothesis for no selection on foreground or no difference between background and background has been rejected.");
+    bustedph.summary =  ("The composite null hypothesis for no selection on foreground or no difference between background and foreground has been rejected.");
     if (bustedph.p2 > 0.068) {
         bustedph.summary += " The neutral model of evolution for background branches is sufficiently supported. There is **statistical evidence that the selection is associated with the trait**";
     } else {
         bustedph.summary += " The neutral model of evolution for background branches is **not** sufficiently supported. Selection is acting broadly on the tree, not just of branches with the trait";
     }
 } else {
-    bustedph.summary = ("The composite null hypothesis for no selection on foreground or no difference between background and background could not be rejected. There is **no** statistical evidence that the selection is associated with the trait.");
+    bustedph.summary = ("The composite null hypothesis for no selection on foreground or no difference between background and foreground could not be rejected. There is **no** statistical evidence that the selection is associated with the trait.");
 }
 
 console.log (bustedph.summary);
@@ -58586,9 +58586,15 @@ for (partition, info; in; CS.busted_ph [terms.json.branch_attributes]) {
         CS.table_output_options[terms.table_options.header] = FALSE;
 
         for (clade, weight; in; CS.clades) {
-            CS.weight = weight / CS.total;
+            if (CS.total > 0) {
+                CS.weight = weight / CS.total;
+            } else {
+                CS.weight = 0;
+            }
             ((CS.results[partition])['weights'])[clade] = CS.weight;
-            CS.entropy += Log (CS.weight) * CS.weight;
+            if (CS.weight > 0) {
+                CS.entropy += Log (CS.weight) * CS.weight;
+            }
             
             CS.stats = CS.clade_stats[clade];
             
@@ -60114,7 +60120,7 @@ c_meme.report.pairwise = {{"" + (1+((c_meme.filter_specification[c_meme.report.p
 
 c_meme.report.overall = {{"" + (1+((c_meme.filter_specification[c_meme.report.partition])[terms.data.coverage])[c_meme.report.site]),
                                     Format(c_meme.report.row[0],0,2),
-ormat(c_meme.report.row[c_meme.report.rate1_index],0,2) + " : " + Format(c_meme.report.row[c_meme.report.rate2_index],0,2),
+                                    Format(c_meme.report.row[c_meme.report.rate1_index],0,2) + " : " + Format(c_meme.report.row[c_meme.report.rate2_index],0,2),
                                     Format(c_meme.report.row[c_meme.report.rate1_index+1],0,2) + " : " + Format(c_meme.report.row[c_meme.report.rate2_index+1],0,2),
                                     Format(c_meme.report.row[c_meme.report.rate1_index+2],0,2) + " : " + Format(c_meme.report.row[c_meme.report.rate2_index+2],0,2),                                    c_meme.report.substitutions,
                                     c_meme.report.test,
